@@ -7,11 +7,15 @@ public class InteractableObject : MonoBehaviour
     private Rigidbody rb;
     private PlacementPoint currentPlacement;
 
+    private Collider[] colliders;
+
     public bool IsPlaced { get; private set; }
 
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
+
+        colliders = GetComponentsInChildren<Collider>();
     }
 
     public void PickUp(Transform holdPoint)
@@ -25,6 +29,8 @@ public class InteractableObject : MonoBehaviour
         IsPlaced = false;
 
         rb.isKinematic = true;
+
+        SetColliders(false);
 
         transform.SetParent(holdPoint);
         transform.localPosition = Vector3.zero;
@@ -42,6 +48,8 @@ public class InteractableObject : MonoBehaviour
 
         rb.isKinematic = true;
 
+        SetColliders(true);
+
         IsPlaced = true;
     }
 
@@ -52,6 +60,16 @@ public class InteractableObject : MonoBehaviour
         transform.SetParent(null);
 
         rb.isKinematic = false;
+
+        SetColliders(true);
+    }
+
+    private void SetColliders(bool enabled)
+    {
+        foreach (Collider col in colliders)
+        {
+            col.enabled = enabled;
+        }
     }
 
     public PlacementPoint GetCurrentPlacement()

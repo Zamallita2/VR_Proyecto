@@ -5,8 +5,16 @@ public class CatFeeder : MonoBehaviour
     [SerializeField] private bool hasFood;
     [SerializeField] private int foodQuality;
 
+    [Header("Visual")]
+    [SerializeField] private GameObject foodVisual;
+
     public bool HasFood => hasFood;
     public int FoodQuality => foodQuality;
+
+    private void Start()
+    {
+        UpdateVisual();
+    }
 
     public bool AddFood(ItemData food)
     {
@@ -19,6 +27,8 @@ public class CatFeeder : MonoBehaviour
         hasFood = true;
         foodQuality = food.quality;
 
+        UpdateVisual();
+
         return true;
     }
 
@@ -26,5 +36,15 @@ public class CatFeeder : MonoBehaviour
     {
         hasFood = false;
         foodQuality = 0;
+
+        UpdateVisual();
+    }
+
+    private void UpdateVisual()
+    {
+        if (foodVisual != null)
+        {
+            foodVisual.SetActive(hasFood);
+        }
     }
 }
