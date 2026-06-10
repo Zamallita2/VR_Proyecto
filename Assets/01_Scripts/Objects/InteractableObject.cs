@@ -21,6 +21,7 @@ public class InteractableObject : MonoBehaviour
             currentPlacement.RemoveObject(this);
             currentPlacement = null;
         }
+
         IsPlaced = false;
 
         rb.isKinematic = true;
@@ -51,5 +52,10 @@ public class InteractableObject : MonoBehaviour
         transform.SetParent(null);
 
         rb.isKinematic = false;
+    }
+
+    public PlacementPoint GetCurrentPlacement()
+    {
+        return currentPlacement;
     }
 }
