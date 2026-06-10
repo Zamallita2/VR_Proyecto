@@ -11,6 +11,8 @@ public class PlayerInteraction : MonoBehaviour
     [SerializeField] private Transform raycastOrigin;
 
     private InteractableObject heldObject;
+    [SerializeField]
+    private GameObject trashBagPrefab;
 
     private void Update()
     {
@@ -61,23 +63,42 @@ public class PlayerInteraction : MonoBehaviour
             raycastOrigin.forward
         );
 
-        if (Physics.Raycast(ray, out RaycastHit hit, interactDistance))
+        if (!Physics.Raycast(
+            ray,
+            out RaycastHit hit,
+            interactDistance))
         {
-            PlacementPoint point =
-                hit.collider.GetComponentInParent<PlacementPoint>();
-
-            if (point != null)
-            {
-                if (point.TryPlaceObject(heldObject))
-                {
-                    heldObject.Place(point.PlacePoint, point);
-
-                    heldObject = null;
-
-                    return true;
-                }
-            }
+            return false;
         }
+
+        ItemData itemData =
+            heldObject.GetComponent<ItemData>();
+
+        if (itemData == null)
+            return false;
+
+        // BASURERO
+
+        if (TryTrashBin(hit, itemData))
+            return true;
+
+        // LIMPIAR ARENERO
+
+        if (TryCleanLitterBox(hit, itemData))
+            return true;
+
+        // COMEDERO
+
+        if (TryFeedCat(hit, itemData))
+            return true;
+
+        // SLOT NORMAL
+
+        if (TryPlaceInSlot(hit))
+            return true;
+        
+        if (TryAddLitter(hit, itemData))
+            return true;
 
         return false;
     }
@@ -86,5 +107,117 @@ public class PlayerInteraction : MonoBehaviour
     {
         heldObject.Drop();
         heldObject = null;
+    }
+    private bool TryAddLitter(
+    RaycastHit hit,
+    ItemData itemData)
+    {
+        CatLitterBox litterBox =
+            hit.collider.GetComponentInParent<CatLitterBox>();
+
+        if (litterBox == null)
+            return false;
+
+        if (itemData.itemType != ItemData.ItemType.Litter)
+            return false;
+
+        if (!litterBox.AddLitter(itemData))
+            return false;
+
+        Destroy(heldObject.gameObject);
+
+        heldObject = null;
+
+        return true;
+    }
+    private bool TryPlaceInSlot(
+    RaycastHit hit)
+    {
+        PlacementPoint point =
+            hit.collider.GetComponentInParent<PlacementPoint>();
+
+        if (point == null)
+            return false;
+
+        if (!point.TryPlaceObject(heldObject))
+            return false;
+
+        heldObject = null;
+
+        return true;
+    }
+    private bool TryCleanLitterBox(
+    RaycastHit hit,
+    ItemData itemData)
+    {
+        CatLitterBox litterBox =
+            hit.collider.GetComponentInParent<CatLitterBox>();
+
+        if (litterBox == null)
+            return false;
+
+        if (itemData.itemType != ItemData.ItemType.Scoop)
+            return false;
+
+        if (!litterBox.CanBeCleaned())
+            return false;
+
+        litterBox.Clean();
+
+        SpawnTrashBag(
+            holdPoint.position
+        );
+
+        return true;
+    }
+    private bool TryTrashBin(
+    RaycastHit hit,
+    ItemData itemData)
+    {
+        TrashBin bin =
+            hit.collider.GetComponentInParent<TrashBin>();
+
+        if (bin == null)
+            return false;
+
+        if (itemData.itemType != ItemData.ItemType.Trash)
+            return false;
+
+        Destroy(heldObject.gameObject);
+
+        heldObject = null;
+
+        return true;
+    }
+    private bool TryFeedCat(
+    RaycastHit hit,
+    ItemData itemData)
+    {
+        CatFeeder feeder =
+            hit.collider.GetComponentInParent<CatFeeder>();
+
+        if (feeder == null)
+            return false;
+
+        if (itemData.itemType != ItemData.ItemType.Food)
+            return false;
+
+        if (!feeder.AddFood(itemData))
+            return false;
+
+        Destroy(heldObject.gameObject);
+
+        heldObject = null;
+
+        return true;
+    }
+    private void SpawnTrashBag(
+    Vector3 position)
+    {
+        Instantiate(
+            trashBagPrefab,
+            position,
+            Quaternion.identity
+        );
     }
 }

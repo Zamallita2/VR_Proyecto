@@ -5,6 +5,9 @@ public class PlacementPoint : MonoBehaviour
     [Header("Punto donde se colocará el objeto")]
     [SerializeField] private Transform placePoint;
 
+    [Header("Restricciones")]
+    [SerializeField] private ItemData.ItemSize acceptedSize;
+
     private InteractableObject currentObject;
     private Collider cr;
 
@@ -29,6 +32,14 @@ public class PlacementPoint : MonoBehaviour
     public bool TryPlaceObject(InteractableObject obj)
     {
         if (IsOccupied)
+            return false;
+
+        ItemData data = obj.GetComponent<ItemData>();
+
+        if (data == null)
+            return false;
+
+        if (data.size != acceptedSize)
             return false;
 
         currentObject = obj;
