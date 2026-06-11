@@ -33,8 +33,11 @@ public class InteractableObject : MonoBehaviour
         SetColliders(false);
 
         transform.SetParent(holdPoint);
-        transform.localPosition = Vector3.zero;
-        transform.localRotation = Quaternion.identity;
+        if (holdPoint != null)
+        {
+            transform.localPosition = Vector3.zero;
+            transform.localRotation = Quaternion.identity;
+        }
     }
 
     public void Place(Transform target, PlacementPoint placement)

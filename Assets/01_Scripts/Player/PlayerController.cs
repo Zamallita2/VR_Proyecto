@@ -19,6 +19,10 @@ public class PlayerController : MonoBehaviour
 
         // Evita que el Rigidbody se caiga de lado
         rb.freezeRotation = true;
+
+        // Oculta y bloquea el cursor al centro de la pantalla
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
     }
 
     private void Update()
@@ -52,9 +56,6 @@ public class PlayerController : MonoBehaviour
 
     void Look()
     {
-        if (!Input.GetMouseButton(1))
-            return;
-
         float mouseX = Input.GetAxis("Mouse X") * mouseSensitivity;
         float mouseY = Input.GetAxis("Mouse Y") * mouseSensitivity;
 

@@ -4,37 +4,91 @@ public class PlayerInteraction : MonoBehaviour
 {
     [Header("Referencias")]
     [SerializeField] private Camera playerCamera;
-    [SerializeField] private Transform holdPoint;
+    [SerializeField] private Transform rightHoldPoint;
+    [SerializeField] private Transform leftHoldPoint;
 
     [Header("Configuración")]
     [SerializeField] private float interactDistance = 3f;
     [SerializeField] private Transform raycastOrigin;
+    [SerializeField] private float maxHandDistance = 1.5f;
 
-    private InteractableObject heldObject;
+    private InteractableObject rightHeldObject;
+    private InteractableObject leftHeldObject;
+
     [SerializeField]
     private GameObject trashBagPrefab;
 
     private void Update()
     {
+        // Actualizar posición de objeto de dos manos y comprobar distancia
+        if (rightHeldObject != null && rightHeldObject == leftHeldObject)
+        {
+            if (leftHoldPoint != null && rightHoldPoint != null)
+            {
+                float dist = Vector3.Distance(leftHoldPoint.position, rightHoldPoint.position);
+                if (dist > maxHandDistance)
+                {
+                    DropTwoHandedObject();
+                }
+                else
+                {
+                    Vector3 midPoint = (leftHoldPoint.position + rightHoldPoint.position) / 2f;
+                    rightHeldObject.transform.position = midPoint;
+                    rightHeldObject.transform.rotation = Quaternion.Slerp(leftHoldPoint.rotation, rightHoldPoint.rotation, 0.5f);
+                }
+            }
+        }
+
+        // Clic izquierdo -> interactúa con la mano DERECHA
         if (Input.GetMouseButtonDown(0))
         {
-            if (heldObject == null)
+            HandleInteraction(ref rightHeldObject, rightHoldPoint, isRightHand: true);
+        }
+
+        // Clic derecho -> interactúa con la mano IZQUIERDA
+        if (Input.GetMouseButtonDown(1))
+        {
+            HandleInteraction(ref leftHeldObject, leftHoldPoint, isRightHand: false);
+        }
+    }
+
+    private void HandleInteraction(ref InteractableObject handObj, Transform handPoint, bool isRightHand)
+    {
+        // Si el objeto actual es de dos manos, se suelta de ambas manos
+        if (handObj != null && leftHeldObject == rightHeldObject)
+        {
+            if (!TryPlaceObject(ref handObj))
             {
-                TryPickUp();
+                DropTwoHandedObject();
             }
-            else
+            return;
+        }
+
+        if (handObj == null)
+        {
+            TryPickUp(ref handObj, handPoint);
+        }
+        else
+        {
+            if (!TryPlaceObject(ref handObj))
             {
-                if (!TryPlaceObject())
-                {
-                    DropObject();
-                }
+                DropObject(ref handObj);
             }
         }
     }
 
-    private void TryPickUp()
+    private void DropTwoHandedObject()
     {
-        
+        if (rightHeldObject != null)
+        {
+            rightHeldObject.Drop();
+            rightHeldObject = null;
+            leftHeldObject = null;
+        }
+    }
+
+    private void TryPickUp(ref InteractableObject handObj, Transform handPoint)
+    {
         Ray ray = new Ray(
             raycastOrigin.position,
             raycastOrigin.forward
@@ -44,6 +98,7 @@ public class PlayerInteraction : MonoBehaviour
             ray.direction * interactDistance,
             Color.red,
             2f);
+
         if (Physics.Raycast(ray, out RaycastHit hit, interactDistance))
         {
             InteractableObject interactable =
@@ -51,12 +106,31 @@ public class PlayerInteraction : MonoBehaviour
 
             if (interactable != null)
             {
-                heldObject = interactable;
-                heldObject.PickUp(holdPoint);
+                ItemData itemData = interactable.GetComponent<ItemData>();
+                if (itemData != null && itemData.size == ItemData.ItemSize.Large)
+                {
+                    // Solo recoger si AMBAS manos están vacías
+                    if (leftHeldObject == null && rightHeldObject == null)
+                    {
+                        leftHeldObject = interactable;
+                        rightHeldObject = interactable;
+                        interactable.PickUp(null); // holdPoint null para objeto grande
+                    }
+                    else
+                    {
+                        Debug.Log("Necesitas ambas manos vacías para recoger este objeto.");
+                    }
+                }
+                else
+                {
+                    handObj = interactable;
+                    handObj.PickUp(handPoint);
+                }
             }
         }
     }
-    private bool TryPlaceObject()
+
+    private bool TryPlaceObject(ref InteractableObject handObj)
     {
         Ray ray = new Ray(
             raycastOrigin.position,
@@ -72,45 +146,48 @@ public class PlayerInteraction : MonoBehaviour
         }
 
         ItemData itemData =
-            heldObject.GetComponent<ItemData>();
+            handObj.GetComponent<ItemData>();
 
         if (itemData == null)
             return false;
 
+        bool isTwoHanded = (leftHeldObject != null && leftHeldObject == rightHeldObject);
+
+        bool success = false;
+
         // BASURERO
-
-        if (TryTrashBin(hit, itemData))
-            return true;
-
+        if (TryTrashBin(hit, itemData, ref handObj))
+            success = true;
         // LIMPIAR ARENERO
-
-        if (TryCleanLitterBox(hit, itemData))
-            return true;
-
+        else if (TryCleanLitterBox(hit, itemData, handObj.transform.position))
+            success = true;
         // COMEDERO
-
-        if (TryFeedCat(hit, itemData))
-            return true;
-
+        else if (TryFeedCat(hit, itemData, ref handObj))
+            success = true;
         // SLOT NORMAL
+        else if (TryPlaceInSlot(hit, ref handObj))
+            success = true;
+        // LITTER
+        else if (TryAddLitter(hit, itemData, ref handObj))
+            success = true;
 
-        if (TryPlaceInSlot(hit))
-            return true;
-        
-        if (TryAddLitter(hit, itemData))
-            return true;
+        if (success && isTwoHanded)
+        {
+            // Limpiar la otra mano si era de dos manos
+            leftHeldObject = null;
+            rightHeldObject = null;
+        }
 
-        return false;
+        return success;
     }
 
-    private void DropObject()
+    private void DropObject(ref InteractableObject handObj)
     {
-        heldObject.Drop();
-        heldObject = null;
+        handObj.Drop();
+        handObj = null;
     }
-    private bool TryAddLitter(
-    RaycastHit hit,
-    ItemData itemData)
+
+    private bool TryAddLitter(RaycastHit hit, ItemData itemData, ref InteractableObject handObj)
     {
         CatLitterBox litterBox =
             hit.collider.GetComponentInParent<CatLitterBox>();
@@ -124,14 +201,14 @@ public class PlayerInteraction : MonoBehaviour
         if (!litterBox.AddLitter(itemData))
             return false;
 
-        Destroy(heldObject.gameObject);
+        Destroy(handObj.gameObject);
 
-        heldObject = null;
+        handObj = null;
 
         return true;
     }
-    private bool TryPlaceInSlot(
-    RaycastHit hit)
+
+    private bool TryPlaceInSlot(RaycastHit hit, ref InteractableObject handObj)
     {
         PlacementPoint point =
             hit.collider.GetComponentInParent<PlacementPoint>();
@@ -139,16 +216,15 @@ public class PlayerInteraction : MonoBehaviour
         if (point == null)
             return false;
 
-        if (!point.TryPlaceObject(heldObject))
+        if (!point.TryPlaceObject(handObj))
             return false;
 
-        heldObject = null;
+        handObj = null;
 
         return true;
     }
-    private bool TryCleanLitterBox(
-    RaycastHit hit,
-    ItemData itemData)
+
+    private bool TryCleanLitterBox(RaycastHit hit, ItemData itemData, Vector3 dropPosition)
     {
         CatLitterBox litterBox =
             hit.collider.GetComponentInParent<CatLitterBox>();
@@ -165,14 +241,13 @@ public class PlayerInteraction : MonoBehaviour
         litterBox.Clean();
 
         SpawnTrashBag(
-            holdPoint.position
+            dropPosition
         );
 
         return true;
     }
-    private bool TryTrashBin(
-    RaycastHit hit,
-    ItemData itemData)
+
+    private bool TryTrashBin(RaycastHit hit, ItemData itemData, ref InteractableObject handObj)
     {
         TrashBin bin =
             hit.collider.GetComponentInParent<TrashBin>();
@@ -183,15 +258,14 @@ public class PlayerInteraction : MonoBehaviour
         if (itemData.itemType != ItemData.ItemType.Trash)
             return false;
 
-        Destroy(heldObject.gameObject);
+        Destroy(handObj.gameObject);
 
-        heldObject = null;
+        handObj = null;
 
         return true;
     }
-    private bool TryFeedCat(
-    RaycastHit hit,
-    ItemData itemData)
+
+    private bool TryFeedCat(RaycastHit hit, ItemData itemData, ref InteractableObject handObj)
     {
         CatFeeder feeder =
             hit.collider.GetComponentInParent<CatFeeder>();
@@ -205,14 +279,14 @@ public class PlayerInteraction : MonoBehaviour
         if (!feeder.AddFood(itemData))
             return false;
 
-        Destroy(heldObject.gameObject);
+        Destroy(handObj.gameObject);
 
-        heldObject = null;
+        handObj = null;
 
         return true;
     }
-    private void SpawnTrashBag(
-    Vector3 position)
+
+    private void SpawnTrashBag(Vector3 position)
     {
         Instantiate(
             trashBagPrefab,

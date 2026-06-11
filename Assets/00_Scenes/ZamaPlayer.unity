@@ -129,7 +129,7 @@ GameObject:
   m_Component:
   - component: {fileID: 79749638}
   m_Layer: 0
-  m_Name: ObjectPoint
+  m_Name: Der
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -145,6 +145,37 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0.35, y: 0.294, z: 1.096}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1627693834}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &114106292
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 114106293}
+  m_Layer: 0
+  m_Name: Iz
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &114106293
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 114106292}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0.578, y: 0.294, z: 1.096}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -668,6 +699,10 @@ PrefabInstance:
     - target: {fileID: 1136637189647296299, guid: faf1c188534e95f59894e4a047681060, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3563461890090907491, guid: faf1c188534e95f59894e4a047681060, type: 3}
+      propertyPath: size
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 4751567222494653949, guid: faf1c188534e95f59894e4a047681060, type: 3}
       propertyPath: m_Name
@@ -2381,6 +2416,7 @@ Transform:
   m_Children:
   - {fileID: 203234587}
   - {fileID: 79749638}
+  - {fileID: 114106293}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1627693835
@@ -2412,9 +2448,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerInteraction
   playerCamera: {fileID: 1184546422}
-  holdPoint: {fileID: 79749638}
+  rightHoldPoint: {fileID: 79749638}
+  leftHoldPoint: {fileID: 114106293}
   interactDistance: 3
   raycastOrigin: {fileID: 203234587}
+  maxHandDistance: 1.5
   trashBagPrefab: {fileID: 9035537198322489612, guid: 58a06280fea844b9a997fa7487e35876, type: 3}
 --- !u!1 &1705437359
 GameObject:
@@ -2524,6 +2562,7 @@ MonoBehaviour:
   needsLitterHappinessDrain: 5
   minBathroomTime: 60
   maxBathroomTime: 120
+  animator: {fileID: 0}
 --- !u!4 &1713423361
 Transform:
   m_ObjectHideFlags: 0
