@@ -29,7 +29,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 8.07, y: 1.01, z: -0.95}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 0.5, y: 0.5, z: 0.5}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 4765795073903279857}
@@ -50,6 +50,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CatFeeder
   hasFood: 0
   foodQuality: 0
+  foodVisual: {fileID: 6714227139943539315}
 --- !u!136 &6669171046228574318
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -246,5 +247,10 @@ PrefabInstance:
 --- !u!4 &6225780831436110025 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 8d7535b218f1307d58a679d6f6a5e3c9, type: 3}
+  m_PrefabInstance: {fileID: 5903326115934641954}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &6714227139943539315 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 8d7535b218f1307d58a679d6f6a5e3c9, type: 3}
   m_PrefabInstance: {fileID: 5903326115934641954}
   m_PrefabAsset: {fileID: 0}
