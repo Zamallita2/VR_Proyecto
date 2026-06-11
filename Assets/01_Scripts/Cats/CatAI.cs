@@ -57,12 +57,20 @@ public class CatAI : MonoBehaviour
     private bool waiting;
     private float litterSearchTimer;
 
+    [Header("Animaciones")]
+    [SerializeField] private Animator animator;
+
     private CatState state = CatState.Wandering;
 
     private void Awake()
     {
         agent = GetComponent<NavMeshAgent>();
         agent.speed = moveSpeed;
+
+        if (animator == null)
+        {
+            animator = GetComponentInChildren<Animator>();
+        }
     }
 
     private void Update()
@@ -103,6 +111,21 @@ public class CatAI : MonoBehaviour
                 UpdateNeedsLitter();
                 break;
         }
+
+        UpdateAnimations();
+    }
+
+    private void UpdateAnimations()
+    {
+        if (animator == null) return;
+
+        // IsWalking: verdadero si el agente se está moviendo a una velocidad notable
+        bool isWalking = agent.velocity.magnitude > 0.1f;
+        animator.SetBool("IsWalking", isWalking);
+
+        // IsTalking: verdadero si está quieto por hambre extrema o falta de arenero
+        bool isTalking = (state == CatState.Starving || state == CatState.NeedsLitter);
+        animator.SetBool("IsTalking", isTalking);
     }
     private void UpdateNeedsLitter()
     {
@@ -242,9 +265,19 @@ public class CatAI : MonoBehaviour
             yield return null;
         }
 
+        if (animator != null)
+        {
+            animator.SetBool("IsEating", true);
+        }
+
         yield return new WaitForSeconds(
             eatingDuration
         );
+
+        if (animator != null)
+        {
+            animator.SetBool("IsEating", false);
+        }
 
         int quality = feeder.FoodQuality;
 
