@@ -62,7 +62,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ItemData
   itemType: 1
   size: 1
-  quality: 1
+  quality: 2
 --- !u!65 &9139785054174920160
 BoxCollider:
   m_ObjectHideFlags: 0

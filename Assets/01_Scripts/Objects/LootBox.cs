@@ -20,7 +20,10 @@ public class LootBox : MonoBehaviour
     
 
     private bool isOpened = false;
-
+    public void SetLoot(List<GameObject> loot)
+    {
+        prefabsToSpawn = new List<GameObject>(loot);
+    }
     public void Interact()
     {
         if (isOpened) return;

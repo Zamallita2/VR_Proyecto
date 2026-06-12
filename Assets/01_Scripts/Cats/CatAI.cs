@@ -10,7 +10,9 @@ public class CatAI : MonoBehaviour
         Eating,
         UsingLitter,
         Starving,
-        NeedsLitter
+        NeedsLitter,
+        Playing,
+        EatingFloorFood
     }
 
     [Header("Movimiento")]
@@ -32,6 +34,10 @@ public class CatAI : MonoBehaviour
     [SerializeField] private float happinessDrainPerSecond = 0.2f;
     [Header("Castigo por hambre extrema")]
     [SerializeField] private float starvingHappinessDrain = 10f;
+
+    [Header("Ingresos")]
+    [SerializeField] private float incomeTimer = 20f;
+    private float currentIncomeTimer;
 
     [Header("Tiempos")]
     [SerializeField] private float wanderWaitTime = 3f;
@@ -62,6 +68,13 @@ public class CatAI : MonoBehaviour
 
     private CatState state = CatState.Wandering;
 
+    // Variables de Juego (Play)
+    private float playTimer;
+    private float playCooldownTimer;
+    private Transform playTarget;
+
+    public float Happiness => happiness;
+
     private void Awake()
     {
         agent = GetComponent<NavMeshAgent>();
@@ -73,11 +86,30 @@ public class CatAI : MonoBehaviour
         }
     }
 
+    private void Start()
+    {
+        if (HappinessManager.Instance != null)
+        {
+            HappinessManager.Instance.RegisterCat(this);
+        }
+
+        ScheduleNextBathroom();
+        GoToRandomWaypoint();
+    }
+
+    private void OnDestroy()
+    {
+        if (HappinessManager.Instance != null)
+        {
+            HappinessManager.Instance.UnregisterCat(this);
+        }
+    }
+
     private void Update()
     {
         hunger -= hungerDrainPerSecond * Time.deltaTime;
         bathroomTimer += Time.deltaTime;
-        Debug.Log(state);
+        
         if (state == CatState.Starving)
         {
             happiness -= starvingHappinessDrain * Time.deltaTime;
@@ -93,9 +125,23 @@ public class CatAI : MonoBehaviour
 
         hunger = Mathf.Clamp(hunger, 0, maxHunger);
         happiness = Mathf.Clamp(happiness, 0, maxHappiness);
+
+        // Lógica de Ingresos
+        currentIncomeTimer += Time.deltaTime;
+        if (currentIncomeTimer >= incomeTimer)
+        {
+            currentIncomeTimer = 0f;
+            GenerateIncome();
+        }
+
         if (hunger <= 0f && state != CatState.Starving)
         {
             EnterStarvingState();
+        }
+
+        if (playCooldownTimer > 0f)
+        {
+            playCooldownTimer -= Time.deltaTime;
         }
 
         switch (state)
@@ -110,23 +156,44 @@ public class CatAI : MonoBehaviour
             case CatState.NeedsLitter:
                 UpdateNeedsLitter();
                 break;
+            case CatState.Playing:
+                UpdatePlaying();
+                break;
         }
 
         UpdateAnimations();
+    }
+
+    private void GenerateIncome()
+    {
+        ShopManager shop = FindAnyObjectByType<ShopManager>();
+        if (shop != null)
+        {
+            if (happiness >= 50f)
+            {
+                shop.AddMoney(5);
+            }
+            else if (happiness >= 25f)
+            {
+                shop.AddMoney(3);
+            }
+        }
     }
 
     private void UpdateAnimations()
     {
         if (animator == null) return;
 
-        // IsWalking: verdadero si el agente se está moviendo a una velocidad notable
         bool isWalking = agent.velocity.magnitude > 0.1f;
         animator.SetBool("IsWalking", isWalking);
 
-        // IsTalking: verdadero si está quieto por hambre extrema o falta de arenero
         bool isTalking = (state == CatState.Starving || state == CatState.NeedsLitter);
         animator.SetBool("IsTalking", isTalking);
+
+        bool isPlaying = (state == CatState.Playing && agent.remainingDistance <= agent.stoppingDistance);
+        animator.SetBool("IsPlaying", isPlaying);
     }
+
     private void UpdateNeedsLitter()
     {
         if (hunger <= hungryThreshold)
@@ -144,12 +211,11 @@ public class CatAI : MonoBehaviour
             TryUseLitter();
         }
     }
+
     private void EnterStarvingState()
     {
         state = CatState.Starving;
-
         hunger = 0;
-
         agent.ResetPath();
     }
 
@@ -165,6 +231,11 @@ public class CatAI : MonoBehaviour
             if (TryUseLitter())
                 return;
         }
+
+        // Comprobar comida en el piso y juguete si no está a punto de morir de hambre/baño
+        if (CheckForFloorFood()) return;
+
+        if (playCooldownTimer <= 0f && CheckForToy()) return;
 
         if (waiting)
         {
@@ -188,11 +259,6 @@ public class CatAI : MonoBehaviour
         }
     }
 
-    private void Start()
-    {
-        ScheduleNextBathroom();
-        GoToRandomWaypoint();
-    }
     private void ScheduleNextBathroom()
     {
         nextBathroomTime = Random.Range(
@@ -211,6 +277,154 @@ public class CatAI : MonoBehaviour
             randomWaypoints[index].position
         );
     }
+
+    // --- NUEVOS COMPORTAMIENTOS --- //
+
+    private bool CheckForToy()
+    {
+        ItemData[] items = FindObjectsByType<ItemData>(FindObjectsSortMode.None);
+        foreach (ItemData item in items)
+        {
+            if (item.itemType == ItemData.ItemType.Toy)
+            {
+                InteractableObject interactable = item.GetComponent<InteractableObject>();
+                // Validar que el jugador lo tiene: no está "colocado" pero es cinemático
+                if (interactable != null && !interactable.IsPlaced && interactable.GetComponent<Rigidbody>().isKinematic)
+                {
+                    float distance = Vector3.Distance(transform.position, interactable.transform.position);
+                    if (distance <= 4f)
+                    {
+                        StartPlaying(interactable.transform);
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    private void StartPlaying(Transform target)
+    {
+        state = CatState.Playing;
+        playTimer = 0f;
+        playTarget = target;
+        agent.SetDestination(target.position);
+    }
+
+    private void UpdatePlaying()
+    {
+        if (hunger <= hungryThreshold)
+        {
+            if (TryGoEat()) return;
+        }
+
+        if (playTarget != null)
+        {
+            agent.SetDestination(playTarget.position);
+        }
+
+        // Aumentar felicidad mientras juega (ej. 2 de felicidad por segundo = 20 total)
+        happiness += 2f * Time.deltaTime;
+        happiness = Mathf.Clamp(happiness, 0, maxHappiness);
+
+        playTimer += Time.deltaTime;
+        if (playTimer >= 10f)
+        {
+            StopPlaying();
+        }
+    }
+
+    private void StopPlaying()
+    {
+        state = CatState.Wandering;
+        playCooldownTimer = 60f; // 1 minuto de cooldown
+        GoToRandomWaypoint();
+    }
+
+    private bool CheckForFloorFood()
+    {
+        ItemData[] items = FindObjectsByType<ItemData>(FindObjectsSortMode.None);
+        foreach (ItemData item in items)
+        {
+            if (item.itemType == ItemData.ItemType.Food)
+            {
+                InteractableObject interactable = item.GetComponent<InteractableObject>();
+                // Comida en el suelo: no colocada y con físicas activas
+                if (interactable != null && !interactable.IsPlaced && !interactable.GetComponent<Rigidbody>().isKinematic)
+                {
+                    float distance = Vector3.Distance(transform.position, interactable.transform.position);
+                    if (distance <= 5f)
+                    {
+                        state = CatState.EatingFloorFood;
+                        StartCoroutine(MoveToFloorFoodAndEat(interactable));
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    private IEnumerator MoveToFloorFoodAndEat(InteractableObject floorFood)
+    {
+        agent.SetDestination(floorFood.transform.position);
+
+        while (agent.pathPending || agent.remainingDistance > agent.stoppingDistance)
+        {
+            // Validar que siga en el suelo
+            if (floorFood == null || floorFood.IsPlaced || floorFood.GetComponent<Rigidbody>().isKinematic)
+            {
+                state = CatState.Wandering;
+                GoToRandomWaypoint();
+                yield break;
+            }
+            yield return null;
+        }
+
+        if (animator != null)
+        {
+            animator.SetBool("IsEating", true);
+        }
+
+        float eatTimer = 0f;
+        float floorEatingDuration = eatingDuration * 1.5f;
+
+        while (eatTimer < floorEatingDuration)
+        {
+            // Validar si el jugador la recoge mientras come
+            if (floorFood == null || floorFood.IsPlaced || floorFood.GetComponent<Rigidbody>().isKinematic)
+            {
+                if (animator != null) animator.SetBool("IsEating", false);
+                state = CatState.Wandering;
+                GoToRandomWaypoint();
+                yield break;
+            }
+
+            eatTimer += Time.deltaTime;
+            yield return null;
+        }
+
+        if (animator != null)
+        {
+            animator.SetBool("IsEating", false);
+        }
+
+        ItemData data = floorFood.GetComponent<ItemData>();
+        int quality = data != null ? data.quality : 1;
+
+        hunger += quality * 30f;
+        if (quality >= 2) happiness += quality * 5f;
+
+        hunger = Mathf.Clamp(hunger, 0, maxHunger);
+        happiness = Mathf.Clamp(happiness, 0, maxHappiness);
+
+        Destroy(floorFood.gameObject);
+
+        state = CatState.Wandering;
+        GoToRandomWaypoint();
+    }
+
+    // --- FIN NUEVOS COMPORTAMIENTOS --- //
 
     private bool TryGoEat()
     {
