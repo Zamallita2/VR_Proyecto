@@ -61,7 +61,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ItemData
   itemType: 3
-  size: 0
+  size: 1
   quality: 1
 --- !u!136 &2823916083483202881
 CapsuleCollider:

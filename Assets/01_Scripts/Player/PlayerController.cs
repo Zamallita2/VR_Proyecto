@@ -13,6 +13,9 @@ public class PlayerController : MonoBehaviour
     private Rigidbody rb;
     private float pitch = 0f;
 
+    [Header("Sonidos")]
+    [SerializeField] private AudioSource walkAudioSource;
+
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
@@ -52,6 +55,13 @@ public class PlayerController : MonoBehaviour
         velocity.y = rb.linearVelocity.y;
 
         rb.linearVelocity = velocity;
+
+        // Sonido de pasos: activo si hay movimiento horizontal
+        if (SoundManager.Instance != null && walkAudioSource != null)
+        {
+            bool isMoving = direction.magnitude > 0.1f;
+            SoundManager.Instance.SetLoopingSFX(walkAudioSource, SoundManager.Instance.playerWalk, isMoving);
+        }
     }
 
     void Look()

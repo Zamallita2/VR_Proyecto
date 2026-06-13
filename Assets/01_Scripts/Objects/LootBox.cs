@@ -29,6 +29,8 @@ public class LootBox : MonoBehaviour
         if (isOpened) return;
         isOpened = true;
 
+        SoundManager.Instance?.PlaySFX(SoundManager.Instance.lootBoxOpen);
+
         if (objectToActivate != null) objectToActivate.SetActive(true);
         if (objectToDeactivate != null) objectToDeactivate.SetActive(false);
 
@@ -77,6 +79,8 @@ public class LootBox : MonoBehaviour
                     finalForce,
                     ForceMode.Impulse
                 );
+
+                SoundManager.Instance?.PlaySFXAt(SoundManager.Instance.lootBoxItemPop, loot.transform.position);
             }
 
             yield return new WaitForSeconds(timePerItem);

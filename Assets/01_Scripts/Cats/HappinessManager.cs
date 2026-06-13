@@ -17,6 +17,8 @@ public class HappinessManager : MonoBehaviour
 
     private List<CatAI> activeCats = new List<CatAI>();
 
+    public IReadOnlyList<CatAI> ActiveCats => activeCats;
+
     [Header("Información")]
     [SerializeField] private float averageHappiness;
     public float AverageHappiness => averageHappiness;
@@ -33,6 +35,7 @@ public class HappinessManager : MonoBehaviour
     [SerializeField] private float maxDonationTime = 120f;
     [SerializeField] private Transform donationSpawnPoint;
     [SerializeField] private LootBox lootBoxPrefab;
+    [SerializeField] private int moneyPerCatDonation = 20;
     
     private float donationTimer;
     private float nextDonationTime;
@@ -125,6 +128,21 @@ public class HappinessManager : MonoBehaviour
             return;
         }
 
+        // ── Sonido de notificación ──────────────────────────────────
+        SoundManager.Instance?.PlaySFX(SoundManager.Instance.notificationDonation);
+
+        // ── 50/50: donación monetaria o caja física ─────────────────
+        bool isMonetaryDonation = (Random.value < 0.5f);
+        if (isMonetaryDonation)
+        {
+            int reward = activeCats.Count * moneyPerCatDonation;
+            ShopManager shop = FindAnyObjectByType<ShopManager>();
+            if (shop != null) shop.AddMoneyRaw(reward);
+            Debug.Log("[Donación monetaria] Recibiste $" + reward + "!");
+            return;
+        }
+
+        // ── Donación de objetos físicos ─────────────────────────────
         int minQuality = 1;
         int maxQuality = 1;
 
@@ -138,35 +156,24 @@ public class HappinessManager : MonoBehaviour
             minQuality = 1;
             maxQuality = 2;
         }
-        else
-        {
-            minQuality = 1;
-            maxQuality = 1;
-        }
 
         List<GameObject> filteredItems = new List<GameObject>();
         foreach (DonationItem item in possibleDonations)
         {
             if (item.quality >= minQuality && item.quality <= maxQuality)
-            {
                 filteredItems.Add(item.prefab);
-            }
         }
 
-        // Si no hay items filtrados, elegir entre todos para evitar que no done nada
         if (filteredItems.Count == 0)
         {
             foreach (DonationItem item in possibleDonations)
-            {
                 filteredItems.Add(item.prefab);
-            }
         }
 
-        if (filteredItems.Count == 0) return; // Lista vacía por completo
+        if (filteredItems.Count == 0) return;
 
         int itemsToDonateCount = activeCats.Count;
         List<GameObject> chosenItems = new List<GameObject>();
-
         for (int i = 0; i < itemsToDonateCount; i++)
         {
             int randomIndex = Random.Range(0, filteredItems.Count);
@@ -177,7 +184,6 @@ public class HappinessManager : MonoBehaviour
         {
             LootBox box = Instantiate(lootBoxPrefab, donationSpawnPoint.position, donationSpawnPoint.rotation);
             box.SetLoot(chosenItems);
-            
             Debug.Log("¡Caja de donación entregada con " + itemsToDonateCount + " objetos!");
         }
     }

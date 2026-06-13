@@ -114,7 +114,8 @@ public class PlayerInteraction : MonoBehaviour
                     {
                         leftHeldObject = interactable;
                         rightHeldObject = interactable;
-                        interactable.PickUp(null); // holdPoint null para objeto grande
+                        interactable.PickUp(null);
+                        SoundManager.Instance?.PlaySFX(SoundManager.Instance.playerGrab);
                     }
                     else
                     {
@@ -125,6 +126,7 @@ public class PlayerInteraction : MonoBehaviour
                 {
                     handObj = interactable;
                     handObj.PickUp(handPoint);
+                    SoundManager.Instance?.PlaySFX(SoundManager.Instance.playerGrab);
                 }
             }
         }
@@ -184,6 +186,7 @@ public class PlayerInteraction : MonoBehaviour
     private void DropObject(ref InteractableObject handObj)
     {
         handObj.Drop();
+        SoundManager.Instance?.PlaySFX(SoundManager.Instance.playerDrop);
         handObj = null;
     }
 
@@ -201,10 +204,9 @@ public class PlayerInteraction : MonoBehaviour
         if (!litterBox.AddLitter(itemData))
             return false;
 
+        SoundManager.Instance?.PlaySFX(SoundManager.Instance.playerFeedSand);
         Destroy(handObj.gameObject);
-
         handObj = null;
-
         return true;
     }
 
@@ -239,11 +241,8 @@ public class PlayerInteraction : MonoBehaviour
             return false;
 
         litterBox.Clean();
-
-        SpawnTrashBag(
-            dropPosition
-        );
-
+        SoundManager.Instance?.PlaySFX(SoundManager.Instance.playerShovel);
+        SpawnTrashBag(dropPosition);
         return true;
     }
 
@@ -258,10 +257,9 @@ public class PlayerInteraction : MonoBehaviour
         if (itemData.itemType != ItemData.ItemType.Trash)
             return false;
 
+        SoundManager.Instance?.PlaySFX(SoundManager.Instance.playerTrash);
         Destroy(handObj.gameObject);
-
         handObj = null;
-
         return true;
     }
 
@@ -279,10 +277,9 @@ public class PlayerInteraction : MonoBehaviour
         if (!feeder.AddFood(itemData))
             return false;
 
+        SoundManager.Instance?.PlaySFX(SoundManager.Instance.playerFeedFood);
         Destroy(handObj.gameObject);
-
         handObj = null;
-
         return true;
     }
 

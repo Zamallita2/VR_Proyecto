@@ -20,6 +20,8 @@ public class CatAI : MonoBehaviour
 
     [SerializeField] private Transform[] randomWaypoints;
     [SerializeField] private Transform[] kitchenWaypoints;
+    [SerializeField] private string randomPointsParentName = "RandomPoints";
+    [SerializeField] private string kitchenPointsParentName = "KitchenPoints";
 
     [Header("Necesidades")]
     [SerializeField] private float maxHunger = 100f;
@@ -66,6 +68,14 @@ public class CatAI : MonoBehaviour
     [Header("Animaciones")]
     [SerializeField] private Animator animator;
 
+    [Header("Sonidos")]
+    [SerializeField] private AudioSource walkAudioSource;
+    private float meowTimer;
+    private float nextMeowTime;
+    private float complainTimer;
+    private float nextComplainTime;
+    private bool wasPlayingReached = false;
+
     private CatState state = CatState.Wandering;
 
     // Variables de Juego (Play)
@@ -88,6 +98,7 @@ public class CatAI : MonoBehaviour
 
     private void Start()
     {
+        LoadWaypoints();
         if (HappinessManager.Instance != null)
         {
             HappinessManager.Instance.RegisterCat(this);
@@ -95,6 +106,44 @@ public class CatAI : MonoBehaviour
 
         ScheduleNextBathroom();
         GoToRandomWaypoint();
+        ScheduleNextMeow();
+        ScheduleNextComplain();
+    }
+    private void LoadWaypoints()
+    {
+        GameObject randomParent =
+            GameObject.Find(randomPointsParentName);
+
+        if (randomParent != null)
+        {
+            randomWaypoints =
+                new Transform[randomParent.transform.childCount];
+
+            for (int i = 0;
+                i < randomParent.transform.childCount;
+                i++)
+            {
+                randomWaypoints[i] =
+                    randomParent.transform.GetChild(i);
+            }
+        }
+
+        GameObject kitchenParent =
+            GameObject.Find(kitchenPointsParentName);
+
+        if (kitchenParent != null)
+        {
+            kitchenWaypoints =
+                new Transform[kitchenParent.transform.childCount];
+
+            for (int i = 0;
+                i < kitchenParent.transform.childCount;
+                i++)
+            {
+                kitchenWaypoints[i] =
+                    kitchenParent.transform.GetChild(i);
+            }
+        }
     }
 
     private void OnDestroy()
@@ -162,6 +211,9 @@ public class CatAI : MonoBehaviour
         }
 
         UpdateAnimations();
+        HandleMeowTimer();
+        HandleComplainTimer();
+        HandleWalkSound();
     }
 
     private void GenerateIncome()
@@ -170,14 +222,54 @@ public class CatAI : MonoBehaviour
         if (shop != null)
         {
             if (happiness >= 50f)
-            {
                 shop.AddMoney(5);
-            }
             else if (happiness >= 25f)
-            {
                 shop.AddMoney(3);
-            }
         }
+    }
+
+    private void HandleMeowTimer()
+    {
+        // Solo maúlla cuando está tranquilo (Wandering) y no ocupado
+        if (state != CatState.Wandering) return;
+
+        meowTimer += Time.deltaTime;
+        if (meowTimer >= nextMeowTime)
+        {
+            SoundManager.Instance?.PlaySFXAt(SoundManager.Instance.catMeow, transform.position);
+            ScheduleNextMeow();
+        }
+    }
+
+    private void ScheduleNextMeow()
+    {
+        meowTimer = 0f;
+        nextMeowTime = Random.Range(5f, 10f);
+    }
+
+    private void HandleComplainTimer()
+    {
+        if (state != CatState.Starving && state != CatState.NeedsLitter) return;
+
+        complainTimer += Time.deltaTime;
+        if (complainTimer >= nextComplainTime)
+        {
+            SoundManager.Instance?.PlaySFXAt(SoundManager.Instance.catComplain, transform.position);
+            ScheduleNextComplain();
+        }
+    }
+
+    private void ScheduleNextComplain()
+    {
+        complainTimer = 0f;
+        nextComplainTime = Random.Range(4f, 7f);
+    }
+
+    private void HandleWalkSound()
+    {
+        if (SoundManager.Instance == null || walkAudioSource == null) return;
+        bool isWalking = agent.velocity.magnitude > 0.1f;
+        SoundManager.Instance.SetLoopingSFX(walkAudioSource, SoundManager.Instance.catWalk, isWalking);
     }
 
     private void UpdateAnimations()
@@ -307,6 +399,7 @@ public class CatAI : MonoBehaviour
     {
         state = CatState.Playing;
         playTimer = 0f;
+        wasPlayingReached = false;
         playTarget = target;
         agent.SetDestination(target.position);
     }
@@ -323,7 +416,15 @@ public class CatAI : MonoBehaviour
             agent.SetDestination(playTarget.position);
         }
 
-        // Aumentar felicidad mientras juega (ej. 2 de felicidad por segundo = 20 total)
+        // Sonido de juego al llegar al target (solo una vez)
+        bool hasArrived = agent.remainingDistance <= agent.stoppingDistance;
+        if (hasArrived && !wasPlayingReached)
+        {
+            wasPlayingReached = true;
+            SoundManager.Instance?.PlaySFXAt(SoundManager.Instance.catPlay, transform.position);
+        }
+
+        // Aumentar felicidad mientras juega
         happiness += 2f * Time.deltaTime;
         happiness = Mathf.Clamp(happiness, 0, maxHappiness);
 
@@ -385,6 +486,8 @@ public class CatAI : MonoBehaviour
         {
             animator.SetBool("IsEating", true);
         }
+
+        SoundManager.Instance?.PlaySFXAt(SoundManager.Instance.catEat, transform.position);
 
         float eatTimer = 0f;
         float floorEatingDuration = eatingDuration * 1.5f;
@@ -483,6 +586,8 @@ public class CatAI : MonoBehaviour
         {
             animator.SetBool("IsEating", true);
         }
+
+        SoundManager.Instance?.PlaySFXAt(SoundManager.Instance.catEat, transform.position);
 
         yield return new WaitForSeconds(
             eatingDuration
@@ -596,6 +701,9 @@ public class CatAI : MonoBehaviour
         {
             happiness -= 10;
         }
+
+        // Maúlla al salir del arenero
+        SoundManager.Instance?.PlaySFXAt(SoundManager.Instance.catMeow, transform.position);
 
         ScheduleNextBathroom();
 

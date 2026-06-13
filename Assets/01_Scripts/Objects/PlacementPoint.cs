@@ -48,7 +48,7 @@ public class PlacementPoint : MonoBehaviour
             cr.enabled = false;
 
         obj.Place(PlacePoint, this);
-
+        SoundManager.Instance?.PlaySFXAt(SoundManager.Instance.playerPlace, transform.position);
         return true;
     }
 
