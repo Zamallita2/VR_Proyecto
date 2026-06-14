@@ -128,9 +128,6 @@ public class HappinessManager : MonoBehaviour
             return;
         }
 
-        // ── Sonido de notificación ──────────────────────────────────
-        SoundManager.Instance?.PlaySFX(SoundManager.Instance.notificationDonation);
-
         // ── 50/50: donación monetaria o caja física ─────────────────
         bool isMonetaryDonation = (Random.value < 0.5f);
         if (isMonetaryDonation)
@@ -138,7 +135,7 @@ public class HappinessManager : MonoBehaviour
             int reward = activeCats.Count * moneyPerCatDonation;
             ShopManager shop = FindAnyObjectByType<ShopManager>();
             if (shop != null) shop.AddMoneyRaw(reward);
-            Debug.Log("[Donación monetaria] Recibiste $" + reward + "!");
+            NotificationManager.Instance?.ShowNotification("¡Has recibido $" + reward + " en donaciones!");
             return;
         }
 
@@ -184,7 +181,7 @@ public class HappinessManager : MonoBehaviour
         {
             LootBox box = Instantiate(lootBoxPrefab, donationSpawnPoint.position, donationSpawnPoint.rotation);
             box.SetLoot(chosenItems);
-            Debug.Log("¡Caja de donación entregada con " + itemsToDonateCount + " objetos!");
+            NotificationManager.Instance?.ShowNotification("¡Has recibido una caja de donación con " + itemsToDonateCount + " objetos!");
         }
     }
 

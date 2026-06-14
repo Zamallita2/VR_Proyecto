@@ -168,6 +168,7 @@ public class ShopManager : MonoBehaviour
         SpawnDelivery();
         pendingItems.Clear();
         deliveryInProgress = false;
+        NotificationManager.Instance?.ShowNotification("¡Tu pedido ha llegado!");
         NotifyShopUpdated();
     }
 

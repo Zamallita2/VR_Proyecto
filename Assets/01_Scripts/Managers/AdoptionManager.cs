@@ -64,7 +64,7 @@ public class AdoptionManager : MonoBehaviour
         // La recompensa es la felicidad actual del gato como monedas
         int reward = Mathf.RoundToInt(chosenCat.Happiness);
 
-        Debug.Log("[AdoptionManager] ¡Han adoptado a " + chosenCat.name + "! Recompensa: $" + reward);
+        NotificationManager.Instance?.ShowNotification("¡Uno de tus gatos ha sido adoptado! Recompensa: $" + reward);
 
         // Dar dinero (sin multiplicador — es una recompensa directa)
         ShopManager shop = FindAnyObjectByType<ShopManager>();
