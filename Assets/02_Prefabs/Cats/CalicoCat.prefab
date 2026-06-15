@@ -80,8 +80,8 @@ MonoBehaviour:
   hungryThreshold: 30
   litterDuration: 10
   needsLitterHappinessDrain: 5
-  minBathroomTime: 60
-  maxBathroomTime: 120
+  minBathroomTime: 40
+  maxBathroomTime: 80
   animator: {fileID: 0}
   walkAudioSource: {fileID: 0}
 --- !u!195 &6845851990837182857

@@ -166,7 +166,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 8.49, y: 1.14, z: -5.45}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 0.5, y: 0.5, z: 0.5}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1704448256482449901}
@@ -185,7 +185,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 367e612f347e6eb37824c71f8d52420d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CatLitterBox
-  remainingUses: 5
+  remainingUses: 3
   dirtiness: 0
   dirtinessText: {fileID: 4075869486095255566}
   usesText: {fileID: 1334190113164001535}

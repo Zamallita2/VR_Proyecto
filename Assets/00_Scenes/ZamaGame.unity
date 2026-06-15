@@ -928,8 +928,8 @@ MonoBehaviour:
   litterBoxPrice: 100
   litterBoxButton: {fileID: 2130850234}
   litterBoxPriceText: {fileID: 735490096}
-  incomeUpgradeBasePrice: 100
-  incomeUpgradePriceStep: 50
+  incomeUpgradeBasePrice: 50
+  incomeUpgradePriceStep: 25
   incomeUpgradeButton: {fileID: 1709325478}
   incomeUpgradePriceText: {fileID: 1775863018}
   catPrefabs:
@@ -14085,18 +14085,6 @@ PrefabInstance:
     - target: {fileID: 3005497934355659945, guid: bd1236af0baf06231b1b9c9c1965ea17, type: 3}
       propertyPath: m_Name
       value: SandBox
-      objectReference: {fileID: 0}
-    - target: {fileID: 8025320749199942888, guid: bd1236af0baf06231b1b9c9c1965ea17, type: 3}
-      propertyPath: m_LocalScale.x
-      value: 0.5
-      objectReference: {fileID: 0}
-    - target: {fileID: 8025320749199942888, guid: bd1236af0baf06231b1b9c9c1965ea17, type: 3}
-      propertyPath: m_LocalScale.y
-      value: 0.5
-      objectReference: {fileID: 0}
-    - target: {fileID: 8025320749199942888, guid: bd1236af0baf06231b1b9c9c1965ea17, type: 3}
-      propertyPath: m_LocalScale.z
-      value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 8025320749199942888, guid: bd1236af0baf06231b1b9c9c1965ea17, type: 3}
       propertyPath: m_LocalPosition.x
