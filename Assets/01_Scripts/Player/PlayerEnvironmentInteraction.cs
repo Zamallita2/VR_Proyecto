@@ -1,28 +1,38 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class PlayerEnvironmentInteraction : MonoBehaviour
 {
     [Header("Configuración")]
-    [SerializeField] private Transform raycastOrigin;
     [SerializeField] private float interactDistance = 3f;
-    [SerializeField] private KeyCode interactKey = KeyCode.E;
+
+    [Header("Configuración VR")]
+    [SerializeField] private Transform rightRaycastOrigin;
+    [SerializeField] private Transform leftRaycastOrigin;
+    [SerializeField] private InputActionReference rightInteractAction;
+    [SerializeField] private InputActionReference leftInteractAction;
 
     private void Update()
     {
-        if (Input.GetKeyDown(interactKey))
+        if (rightInteractAction != null && rightInteractAction.action.WasPressedThisFrame())
         {
-            TryInteract();
+            TryInteract(rightRaycastOrigin);
+        }
+
+        if (leftInteractAction != null && leftInteractAction.action.WasPressedThisFrame())
+        {
+            TryInteract(leftRaycastOrigin);
         }
     }
 
-    private void TryInteract()
+    private void TryInteract(Transform currentOrigin)
     {
-        if (raycastOrigin == null)
+        if (currentOrigin == null)
             return;
 
         Ray ray = new Ray(
-            raycastOrigin.position,
-            raycastOrigin.forward
+            currentOrigin.position,
+            currentOrigin.forward
         );
 
         Debug.DrawRay(

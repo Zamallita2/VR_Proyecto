@@ -12,5 +12,6 @@ EditorBuildSettings:
     path: Assets/00_Scenes/ZamaGame.unity
     guid: c8a541d951d9ee09b8993974e5d04456
   m_configObjects:
+    Unity.XR.Oculus.Settings: {fileID: 11400000, guid: 311b2f0299c89ba499464e5b783fe77a, type: 2}
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   m_UseUCBPForAssetBundles: 0

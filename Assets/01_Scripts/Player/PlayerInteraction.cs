@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class PlayerInteraction : MonoBehaviour
 {
@@ -9,8 +10,13 @@ public class PlayerInteraction : MonoBehaviour
 
     [Header("Configuración")]
     [SerializeField] private float interactDistance = 3f;
-    [SerializeField] private Transform raycastOrigin;
     [SerializeField] private float maxHandDistance = 1.5f;
+
+    [Header("Configuración VR")]
+    [SerializeField] private Transform rightRaycastOrigin;
+    [SerializeField] private Transform leftRaycastOrigin;
+    [SerializeField] private InputActionReference rightTriggerAction;
+    [SerializeField] private InputActionReference leftTriggerAction;
 
     private InteractableObject rightHeldObject;
     private InteractableObject leftHeldObject;
@@ -39,14 +45,14 @@ public class PlayerInteraction : MonoBehaviour
             }
         }
 
-        // Clic izquierdo -> interactúa con la mano DERECHA
-        if (Input.GetMouseButtonDown(0))
+        // Gatillo derecho -> interactúa con la mano DERECHA
+        if (rightTriggerAction != null && rightTriggerAction.action.WasPressedThisFrame())
         {
             HandleInteraction(ref rightHeldObject, rightHoldPoint, isRightHand: true);
         }
 
-        // Clic derecho -> interactúa con la mano IZQUIERDA
-        if (Input.GetMouseButtonDown(1))
+        // Gatillo izquierdo -> interactúa con la mano IZQUIERDA
+        if (leftTriggerAction != null && leftTriggerAction.action.WasPressedThisFrame())
         {
             HandleInteraction(ref leftHeldObject, leftHoldPoint, isRightHand: false);
         }
@@ -57,7 +63,7 @@ public class PlayerInteraction : MonoBehaviour
         // Si el objeto actual es de dos manos, se suelta de ambas manos
         if (handObj != null && leftHeldObject == rightHeldObject)
         {
-            if (!TryPlaceObject(ref handObj))
+            if (!TryPlaceObject(ref handObj, isRightHand))
             {
                 DropTwoHandedObject();
             }
@@ -66,11 +72,11 @@ public class PlayerInteraction : MonoBehaviour
 
         if (handObj == null)
         {
-            TryPickUp(ref handObj, handPoint);
+            TryPickUp(ref handObj, handPoint, isRightHand);
         }
         else
         {
-            if (!TryPlaceObject(ref handObj))
+            if (!TryPlaceObject(ref handObj, isRightHand))
             {
                 DropObject(ref handObj);
             }
@@ -87,11 +93,15 @@ public class PlayerInteraction : MonoBehaviour
         }
     }
 
-    private void TryPickUp(ref InteractableObject handObj, Transform handPoint)
+    private void TryPickUp(ref InteractableObject handObj, Transform handPoint, bool isRightHand)
     {
+        Transform currentOrigin = isRightHand ? rightRaycastOrigin : leftRaycastOrigin;
+
+        if (currentOrigin == null) return;
+
         Ray ray = new Ray(
-            raycastOrigin.position,
-            raycastOrigin.forward
+            currentOrigin.position,
+            currentOrigin.forward
         );
         Debug.DrawRay(
             ray.origin,
@@ -132,11 +142,15 @@ public class PlayerInteraction : MonoBehaviour
         }
     }
 
-    private bool TryPlaceObject(ref InteractableObject handObj)
+    private bool TryPlaceObject(ref InteractableObject handObj, bool isRightHand)
     {
+        Transform currentOrigin = isRightHand ? rightRaycastOrigin : leftRaycastOrigin;
+
+        if (currentOrigin == null) return false;
+
         Ray ray = new Ray(
-            raycastOrigin.position,
-            raycastOrigin.forward
+            currentOrigin.position,
+            currentOrigin.forward
         );
 
         if (!Physics.Raycast(

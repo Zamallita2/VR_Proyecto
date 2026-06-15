@@ -4397,7 +4397,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!54 &1453232306
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -4538,8 +4538,11 @@ MonoBehaviour:
   rightHoldPoint: {fileID: 1676058315}
   leftHoldPoint: {fileID: 1096783177}
   interactDistance: 3
-  raycastOrigin: {fileID: 203842802}
   maxHandDistance: 1.5
+  rightRaycastOrigin: {fileID: 0}
+  leftRaycastOrigin: {fileID: 0}
+  rightTriggerAction: {fileID: 0}
+  leftTriggerAction: {fileID: 0}
   trashBagPrefab: {fileID: 9035537198322489612, guid: 58a06280fea844b9a997fa7487e35876, type: 3}
 --- !u!114 &1453232312
 MonoBehaviour:
@@ -4553,9 +4556,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b70195fd050f7714586ce45f52d26e28, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerEnvironmentInteraction
-  raycastOrigin: {fileID: 141145312}
   interactDistance: 3
-  interactKey: 101
+  rightRaycastOrigin: {fileID: 0}
+  leftRaycastOrigin: {fileID: 0}
+  rightInteractAction: {fileID: 0}
+  leftInteractAction: {fileID: 0}
 --- !u!4 &1453232313
 Transform:
   m_ObjectHideFlags: 0
@@ -4901,6 +4906,128 @@ Transform:
   - {fileID: 1752589302}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1001 &1569700977
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 1717954561962503725, guid: f6336ac4ac8b4d34bc5072418cdc62a0, type: 3}
+      propertyPath: m_Name
+      value: XR Origin (XR Rig)
+      objectReference: {fileID: 0}
+    - target: {fileID: 1717954561962503726, guid: f6336ac4ac8b4d34bc5072418cdc62a0, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 1.19868
+      objectReference: {fileID: 0}
+    - target: {fileID: 1717954561962503726, guid: f6336ac4ac8b4d34bc5072418cdc62a0, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.53039
+      objectReference: {fileID: 0}
+    - target: {fileID: 1717954561962503726, guid: f6336ac4ac8b4d34bc5072418cdc62a0, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -1.66766
+      objectReference: {fileID: 0}
+    - target: {fileID: 1717954561962503726, guid: f6336ac4ac8b4d34bc5072418cdc62a0, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1717954561962503726, guid: f6336ac4ac8b4d34bc5072418cdc62a0, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1717954561962503726, guid: f6336ac4ac8b4d34bc5072418cdc62a0, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1717954561962503726, guid: f6336ac4ac8b4d34bc5072418cdc62a0, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1717954561962503726, guid: f6336ac4ac8b4d34bc5072418cdc62a0, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1717954561962503726, guid: f6336ac4ac8b4d34bc5072418cdc62a0, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1717954561962503726, guid: f6336ac4ac8b4d34bc5072418cdc62a0, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 1717954561962503725, guid: f6336ac4ac8b4d34bc5072418cdc62a0, type: 3}
+      insertIndex: 1
+      addedObject: {fileID: 1569700983}
+    - targetCorrespondingSourceObject: {fileID: 1717954561962503725, guid: f6336ac4ac8b4d34bc5072418cdc62a0, type: 3}
+      insertIndex: 2
+      addedObject: {fileID: 1569700982}
+  m_SourcePrefab: {fileID: 100100000, guid: f6336ac4ac8b4d34bc5072418cdc62a0, type: 3}
+--- !u!1 &1569700978 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1717954561962503725, guid: f6336ac4ac8b4d34bc5072418cdc62a0, type: 3}
+  m_PrefabInstance: {fileID: 1569700977}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &1569700979 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 1670256625, guid: f6336ac4ac8b4d34bc5072418cdc62a0, type: 3}
+  m_PrefabInstance: {fileID: 1569700977}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &1569700980 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 202364688, guid: f6336ac4ac8b4d34bc5072418cdc62a0, type: 3}
+  m_PrefabInstance: {fileID: 1569700977}
+  m_PrefabAsset: {fileID: 0}
+--- !u!20 &1569700981 stripped
+Camera:
+  m_CorrespondingSourceObject: {fileID: 1767192439, guid: f6336ac4ac8b4d34bc5072418cdc62a0, type: 3}
+  m_PrefabInstance: {fileID: 1569700977}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1569700982
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1569700978}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 920e72d8fee8e5278acca485be69df27, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerInteraction
+  playerCamera: {fileID: 1569700981}
+  rightHoldPoint: {fileID: 1569700979}
+  leftHoldPoint: {fileID: 1569700980}
+  interactDistance: 3
+  maxHandDistance: 1.5
+  rightRaycastOrigin: {fileID: 1569700979}
+  leftRaycastOrigin: {fileID: 1569700980}
+  rightTriggerAction: {fileID: 0}
+  leftTriggerAction: {fileID: 0}
+  trashBagPrefab: {fileID: 9035537198322489612, guid: 58a06280fea844b9a997fa7487e35876, type: 3}
+--- !u!114 &1569700983
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1569700978}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b70195fd050f7714586ce45f52d26e28, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerEnvironmentInteraction
+  interactDistance: 3
+  rightRaycastOrigin: {fileID: 1569700979}
+  leftRaycastOrigin: {fileID: 1569700980}
+  rightInteractAction: {fileID: 0}
+  leftInteractAction: {fileID: 0}
 --- !u!1 &1579211196
 GameObject:
   m_ObjectHideFlags: 0
@@ -6827,3 +6954,4 @@ SceneRoots:
   - {fileID: 1737870520}
   - {fileID: 826331494}
   - {fileID: 1042346232}
+  - {fileID: 1569700977}
